@@ -4,16 +4,15 @@ phases:
   install:
     runtime-versions:
       nodejs: 18
-    commands:
-      - npm install -g react-scripts
   pre_build:
     commands:
-      - npm install --legacy-peer-deps
+      - npm ci  # Use npm ci instead of npm install for cleaner installs
   build:
     commands:
-      - CI=false npm run build
-
+      - npm run build
+      
 artifacts:
-  base-directory: .
   files:
-    - 'build/**/*'
+    - '**/*'
+  base-directory: build
+  discard-paths: no
