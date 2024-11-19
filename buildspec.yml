@@ -4,13 +4,15 @@ phases:
   install:
     runtime-versions:
       nodejs: 18
+    commands:
+      - npm install -g create-react-app
   pre_build:
     commands:
-      - npm ci  # Use npm ci instead of npm install for cleaner installs
+      - npm install --legacy-peer-deps
   build:
     commands:
       - npm run build
-      
+
 artifacts:
   files:
     - '**/*'
