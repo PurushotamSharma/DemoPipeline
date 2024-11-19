@@ -5,16 +5,17 @@ phases:
     runtime-versions:
       nodejs: 18
     commands:
-      - npm install -g create-react-app
+      - npm install -g npm@latest
   pre_build:
     commands:
+      - npm install react-scripts --save
       - npm install --legacy-peer-deps
   build:
     commands:
-      - npm run build
-
+      - echo "Building React app..."
+      - node node_modules/react-scripts/bin/react-scripts.js build
+      
 artifacts:
+  base-directory: build
   files:
     - '**/*'
-  base-directory: build
-  discard-paths: no
