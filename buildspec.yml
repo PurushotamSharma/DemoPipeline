@@ -4,18 +4,21 @@ phases:
   install:
     runtime-versions:
       nodejs: 18
-    commands:
-      - npm install -g npm@latest
   pre_build:
     commands:
-      - npm install react-scripts --save
       - npm install --legacy-peer-deps
   build:
     commands:
-      - echo "Building React app..."
-      - node node_modules/react-scripts/bin/react-scripts.js build
-      
+      - npm run build
+  post_build:
+    commands:
+      - cp appspec.yml build/
+      - cp -r scripts build/
+
 artifacts:
   base-directory: build
   files:
     - '**/*'
+    - appspec.yml
+    - scripts/**/*
+  discard-paths: no
