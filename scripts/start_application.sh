@@ -1,3 +1,5 @@
 #!/bin/bash
 cd /var/www/html
-pm2 serve . 3000 --name "react-app" --spa
+sudo pm2 serve . 80 --name "react-app" --spa
+pm2 save
+pm2 startup
