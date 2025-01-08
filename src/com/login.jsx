@@ -11,7 +11,7 @@ function Login() {
     if (username === 'admin' && password === 'password') {
       history.push('/dashboard')
     } else {
-      alert('Invalid credentials') //cdsccdcdscsdscscscsfdfggdsgdgdfgdsfggdfgdf
+      alert('Invalid credentials') //cdsccdcdscsdscscscsfdfggdsgdgdfbdfghghdfghfgdfhdfghfghdfghdfhdffdhdfghdfhdhgdfhgdsfggdfgdf
     }
   }
 

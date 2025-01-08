@@ -13,7 +13,7 @@ const Signup = () => {
     if (password === confirmPassword) {
       // You can add a signup API call here if needed
       alert('Signup successful!');
-      history.push('/login'); // Redirect to login pagsdasdfsegsffdsdfsddsfsdfsdfsdsfsfsdfsdfsfssde cddscdcdscdsccdscdcssdscdccdcs;cmascmlcascklasc;ldjcsjclsdmcascljasfjd
+      history.push('/login'); // Redirect to login  cddscdcdscdsccdscdcssdscdccdcs;cmascmlcascklasc;ldjcsjclsdmcascljasfjd
     } else {
       alert('Passwords do not match');
     }
