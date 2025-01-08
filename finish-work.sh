@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Colors
+# Colors (only for display, not for messages)
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -14,7 +14,7 @@ MAIN_BRANCH="main"
 log_info() { echo -e "${YELLOW}ℹ $1${NC}"; }
 log_success() { echo -e "${GREEN}✓ $1${NC}"; }
 
-generate_specific_message() {
+generate_commit_message() {
     local changed_files=$(git diff --cached --name-only)
     local features=()
     
@@ -42,55 +42,54 @@ generate_specific_message() {
             features+=("home page")
         fi
         if [[ $file =~ [Aa]pi ]]; then
-            features+=("API integration")
+            features+=("API")
         fi
-        # Add more specific feature patterns as needed
     done <<< "$changed_files"
     
     # Remove duplicates
     features=($(echo "${features[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
     
-    # Generate specific message based on features
-    local msg=""
+    # Generate commit title
+    local commit_title
     if [ ${#features[@]} -gt 0 ]; then
-        msg="update: "
+        commit_title="update:"
         for feature in "${features[@]}"; do
-            msg+="$feature, "
+            commit_title+=" $feature"
         done
-        msg=${msg%, }  # Remove trailing comma
     else
-        # If no specific features found, analyze file types
         if echo "$changed_files" | grep -q "\.js\|\.jsx\|\.ts\|\.tsx"; then
-            msg="update: feature implementation"
+            commit_title="update: feature implementation"
         elif echo "$changed_files" | grep -q "\.css\|\.scss"; then
-            msg="update: styling changes"
+            commit_title="update: styles"
         elif echo "$changed_files" | grep -q "\.yml"; then
-            msg="update: configuration changes"
+            commit_title="update: configuration"
         elif echo "$changed_files" | grep -q "package.json"; then
-            msg="update: dependencies"
+            commit_title="update: dependencies"
         else
-            msg="update: general changes"
+            commit_title="update: general changes"
         fi
     fi
     
-    # Add file details
+    # Generate file list
     local files_list=""
     while IFS= read -r file; do
         if [ -n "$file" ]; then
-            files_list+="\n- $file"
+            files_list+="\n• $file"
         fi
     done <<< "$changed_files"
     
-    echo -e "${BLUE}Generated Commit Message:${NC}"
-    echo -e "$msg"
-    echo -e "\n${YELLOW}Modified Files:${NC}$files_list"
+    # Display message for review
+    echo -e "${BLUE}Commit Message Preview:${NC}"
+    echo -e "${YELLOW}Title:${NC} $commit_title"
+    echo -e "${YELLOW}Files:${NC}$files_list"
     
     # Confirm or modify message
     echo -e "\n${BLUE}Use this message? (y/n)${NC}"
     read -p "> " use_message
     
     if [[ $use_message =~ ^[Yy]$ ]]; then
-        echo "$msg$files_list"
+        # Return clean message without color codes
+        echo "$commit_title$files_list"
     else
         echo -e "\n${BLUE}Enter custom message:${NC}"
         read -p "> " custom_msg
@@ -114,13 +113,18 @@ git add .
 log_success "Changes staged"
 
 # Generate and apply commit message
-commit_message=$(generate_specific_message)
-git commit -m "$commit_message"
+commit_message=$(generate_commit_message)
+
+# Clean up the message by removing any remaining color codes
+clean_message=$(echo "$commit_message" | sed 's/\x1b\[[0-9;]*m//g')
+
+# Commit with clean message
+git commit -m "$clean_message"
 log_success "Changes committed"
 
 # Push changes
 git push -u origin "$current_branch"
-log_success "Changes pushed to remote"
+log_success "Changes pushed"
 
 # Offer merge
 echo -e "\n${BLUE}Merge to main? (y/n)${NC}"
