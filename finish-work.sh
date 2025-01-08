@@ -11,12 +11,91 @@ NC='\033[0m'
 MAIN_BRANCH="main"
 
 # Functions
-log_info() {
-    echo -e "${YELLOW}ℹ $1${NC}"
-}
+log_info() { echo -e "${YELLOW}ℹ $1${NC}"; }
+log_success() { echo -e "${GREEN}✓ $1${NC}"; }
 
-log_success() {
-    echo -e "${GREEN}✓ $1${NC}"
+generate_specific_message() {
+    local changed_files=$(git diff --cached --name-only)
+    local features=()
+    
+    # Analyze each changed file for specific features
+    while IFS= read -r file; do
+        if [[ $file =~ [Ll]ogin ]]; then
+            features+=("login")
+        fi
+        if [[ $file =~ [Ss]ignup ]]; then
+            features+=("signup")
+        fi
+        if [[ $file =~ [Aa]uth ]]; then
+            features+=("authentication")
+        fi
+        if [[ $file =~ [Pp]rofile ]]; then
+            features+=("user profile")
+        fi
+        if [[ $file =~ [Dd]ashboard ]]; then
+            features+=("dashboard")
+        fi
+        if [[ $file =~ [Nn]av ]]; then
+            features+=("navigation")
+        fi
+        if [[ $file =~ [Hh]ome ]]; then
+            features+=("home page")
+        fi
+        if [[ $file =~ [Aa]pi ]]; then
+            features+=("API integration")
+        fi
+        # Add more specific feature patterns as needed
+    done <<< "$changed_files"
+    
+    # Remove duplicates
+    features=($(echo "${features[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
+    
+    # Generate specific message based on features
+    local msg=""
+    if [ ${#features[@]} -gt 0 ]; then
+        msg="update: "
+        for feature in "${features[@]}"; do
+            msg+="$feature, "
+        done
+        msg=${msg%, }  # Remove trailing comma
+    else
+        # If no specific features found, analyze file types
+        if echo "$changed_files" | grep -q "\.js\|\.jsx\|\.ts\|\.tsx"; then
+            msg="update: feature implementation"
+        elif echo "$changed_files" | grep -q "\.css\|\.scss"; then
+            msg="update: styling changes"
+        elif echo "$changed_files" | grep -q "\.yml"; then
+            msg="update: configuration changes"
+        elif echo "$changed_files" | grep -q "package.json"; then
+            msg="update: dependencies"
+        else
+            msg="update: general changes"
+        fi
+    fi
+    
+    # Add file details
+    local files_list=""
+    while IFS= read -r file; do
+        if [ -n "$file" ]; then
+            files_list+="\n- $file"
+        fi
+    done <<< "$changed_files"
+    
+    echo -e "${BLUE}Generated Commit Message:${NC}"
+    echo -e "$msg"
+    echo -e "\n${YELLOW}Modified Files:${NC}$files_list"
+    
+    # Confirm or modify message
+    echo -e "\n${BLUE}Use this message? (y/n)${NC}"
+    read -p "> " use_message
+    
+    if [[ $use_message =~ ^[Yy]$ ]]; then
+        echo "$msg$files_list"
+    else
+        echo -e "\n${BLUE}Enter custom message:${NC}"
+        read -p "> " custom_msg
+        echo "$custom_msg$files_list"
+    fi
 }
 
 # Start workflow
@@ -34,36 +113,14 @@ git status
 git add .
 log_success "Changes staged"
 
-# Commit type
-echo -e "\n${BLUE}Commit type:${NC}"
-echo "f = feature"
-echo "b = bugfix"
-echo "d = docs"
-echo "r = refactor"
-echo "s = style"
-read -p "> " commit_type
-
-# Convert commit type
-case $commit_type in
-    "f"|"F") prefix="feat" ;;
-    "b"|"B") prefix="fix" ;;
-    "d"|"D") prefix="docs" ;;
-    "r"|"R") prefix="refactor" ;;
-    "s"|"S") prefix="style" ;;
-    *) prefix="feat" ;;
-esac
-
-# Get commit message
-echo -e "\n${BLUE}Enter commit message:${NC}"
-read -p "> " message
-
-# Create commit
-git commit -m "$prefix: $message"
+# Generate and apply commit message
+commit_message=$(generate_specific_message)
+git commit -m "$commit_message"
 log_success "Changes committed"
 
 # Push changes
 git push -u origin "$current_branch"
-log_success "Changes pushed"
+log_success "Changes pushed to remote"
 
 # Offer merge
 echo -e "\n${BLUE}Merge to main? (y/n)${NC}"
@@ -78,7 +135,6 @@ if [[ $do_merge =~ ^[Yy]$ ]]; then
     # Offer branch deletion
     echo -e "\n${BLUE}Delete branch? (y/n)${NC}"
     read -p "> " do_delete
-    
     if [[ $do_delete =~ ^[Yy]$ ]]; then
         git branch -d "$current_branch"
         git push origin --delete "$current_branch"
