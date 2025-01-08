@@ -7,21 +7,21 @@ phases:
     commands:
       - npm install -g react-scripts
   pre_build:
-    commands:
-      - npm install
-  build:
+    commands:rd
+      - npm installdd
+  build:er
     commands:
       - CI=false npm run build
-  post_build:
-    commands:
+  post_build:ddffvergergerg
+    commands:vfbvfv
       - mkdir -p build
       - cp appspec.yml build/
-      - cp -r scripts build/
+      - cp -r scripts dfvcxbuild/
 
-artifacts:
+artifacts:xc 
   base-directory: build
   files:
-    - '**/*'
+    - '**/*'cx
     - appspec.yml
     - scripts/**/*
-  discard-paths: no
+  discard-paths: noxvxcvxv

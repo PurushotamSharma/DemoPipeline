@@ -9,22 +9,22 @@ permissions:
     owner: ubuntu
     group: ubuntu
     mode: 755
-    type:
+    type:bffbgb
       - directory
       - file
 hooks:
   BeforeInstall:
     - location: scripts/install_dependencies.sh
       timeout: 300
-      runas: root
+      runas: rootvfvrt
     - location: scripts/stop_application.sh
       timeout: 300
       runas: root
-  AfterInstall:
+  AfterInstall:bdbrbrb
     - location: scripts/start_application.sh
       timeout: 300
-      runas: root
+      runas: rootfvfbrf
   ValidateService:
     - location: scripts/validate_service.sh
       timeout: 300
-      runas: root
+      runas: rootfvfrvrfv
